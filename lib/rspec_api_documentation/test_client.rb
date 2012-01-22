@@ -1,9 +1,14 @@
+require 'cgi'
+
 module RspecApiDocumentation
   class TestClient < Struct.new(:session, :options)
     attr_accessor :user
 
     delegate :example, :last_response, :last_request, :to => :session
-    delegate :metadata, :to => :example
+
+    def metadata
+      example.metadata[:api_documentation] ||= {}
+    end
 
     def get(*args)
       process :get, *args

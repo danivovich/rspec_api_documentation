@@ -15,7 +15,7 @@ resource "Order" do
   end
 
   describe "example metadata" do
-    subject { example.metadata }
+    subject { example.metadata[:api_documentation] }
 
     its([:resource_name]) { should eq("Order") }
     its([:document]) { should be_true }
@@ -36,7 +36,7 @@ resource "Order" do
       specify { example.example_group.description.should eq("#{http_method.to_s.upcase} /path") }
 
       describe "example metadata" do
-        subject { example.metadata }
+        subject { example.metadata[:api_documentation] }
 
         its([:method]) { should eq(http_method) }
         its([:path]) { should eq("/path") }
@@ -63,7 +63,7 @@ resource "Order" do
     parameter :size, "The size of drink you want."
     parameter :note, "Any additional notes about your order."
 
-    subject { example.metadata }
+    subject { example.metadata[:api_documentation] }
 
     post "/orders" do
       required_parameters :type, :size
@@ -103,7 +103,7 @@ resource "Order" do
     let(:size) { "medium" }
 
     describe "example metadata" do
-      subject { example.metadata }
+      subject { example.metadata[:api_documentation] }
 
       it "should include the documentated parameters" do
         subject[:parameters].should eq(
@@ -207,14 +207,14 @@ resource "Order" do
     parameter :per_page, "Number of results on a page"
 
     it "should only have 1 parameter" do
-      example.metadata[:parameters].length.should == 1
+      example.metadata[:api_documentation][:parameters].length.should == 1
     end
 
     context "another parameter" do
       parameter :page, "Current page"
 
       it 'should have 2 parameters' do
-        example.metadata[:parameters].length.should == 2
+        example.metadata[:api_documentation][:parameters].length.should == 2
       end
     end
   end
@@ -246,7 +246,6 @@ resource "Order" do
       trigger_callback do
         uri = URI.parse(callback_url)
         Net::HTTP.start(uri.host, uri.port) do |http|
-          # debugger
           http.request Net::HTTP::Post.new(uri.path)
         end
       end
@@ -321,7 +320,7 @@ resource "Order" do
         parameter :type, "Order type", :scope => :order
 
         it "should save the scope" do
-          param = example.metadata[:parameters].detect { |param| param[:name] == "type" }
+          param = example.metadata[:api_documentation][:parameters].detect { |param| param[:name] == "type" }
           param[:scope].should == :order
         end
       end
@@ -334,7 +333,7 @@ resource "Order" do
         scope_parameters :order, [:name, :size]
 
         it 'should set the scope on listed parameters' do
-          param = example.metadata[:parameters].detect { |param| param[:name] == "name" }
+          param = example.metadata[:api_documentation][:parameters].detect { |param| param[:name] == "name" }
           param[:scope].should == :order
         end
 
@@ -370,7 +369,7 @@ resource "Order" do
     post "/orders" do
       example "Creating an order" do
         explanation "By creating an order..."
-        example.metadata[:explanation].should == "By creating an order..."
+        example.metadata[:api_documentation][:explanation].should == "By creating an order..."
       end
     end
   end
@@ -420,6 +419,6 @@ resource "top level parameters" do
   parameter :page, "Current page"
 
   it 'should have 1 parameter' do
-    example.metadata[:parameters].length.should == 1
+    example.metadata[:api_documentation][:parameters].length.should == 1
   end
 end

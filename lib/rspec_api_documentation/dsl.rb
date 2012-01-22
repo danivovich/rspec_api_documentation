@@ -1,6 +1,7 @@
 require 'rack/test/methods'
 require 'rack'
 require 'webmock'
+require 'cgi'
 
 module RspecApiDocumentation
   module DSL
@@ -10,8 +11,9 @@ module RspecApiDocumentation
       def self.define_action(method)
         define_method method do |*args, &block|
           options = if args.last.is_a?(Hash) then args.pop else {} end
-          options[:method] = method
-          options[:path] = args.first
+          options[:api_documentation] ||= {}
+          options[:api_documentation][:method] = method
+          options[:api_documentation][:path] = args.first
           args.push(options)
           args[0] = "#{method.to_s.upcase} #{args[0]}"
           context(*args, &block)
@@ -48,7 +50,7 @@ module RspecApiDocumentation
       end
 
       def scope_parameters(scope, keys)
-        return unless metadata[:parameters]
+        return unless api_metadata[:parameters]
 
         if keys == :all
           keys = parameter_keys.map(&:to_s)
@@ -71,15 +73,24 @@ module RspecApiDocumentation
 
       private
       def parameters
-        metadata[:parameters] ||= []
-        if superclass_metadata && metadata[:parameters].equal?(superclass_metadata[:parameters])
-          metadata[:parameters] = Marshal.load(Marshal.dump(superclass_metadata[:parameters]))
+        api_metadata[:parameters] ||= []
+        if superclass_api_metadata && api_metadata[:parameters].equal?(superclass_api_metadata[:parameters])
+          api_metadata[:parameters] = Marshal.load(Marshal.dump(superclass_api_metadata[:parameters]))
         end
-        metadata[:parameters]
+        api_metadata[:parameters]
       end
 
       def parameter_keys
         parameters.map { |param| param[:name] }
+      end
+
+      def api_metadata
+        metadata[:api_documentation] ||= {}
+      end
+
+      def superclass_api_metadata
+        return nil unless superclass_metadata
+        superclass_metadata[:api_documentation]
       end
     end
 
@@ -119,8 +130,8 @@ module RspecApiDocumentation
       end
 
       def params
-        return unless example.metadata[:parameters]
-        parameters = example.metadata[:parameters].inject({}) do |hash, param|
+        return unless example_api_metadata[:parameters]
+        parameters = example_api_metadata[:parameters].inject({}) do |hash, param|
           set_param(hash, param)
         end
         parameters.merge!(extra_params)
@@ -128,7 +139,7 @@ module RspecApiDocumentation
       end
 
       def method
-        example.metadata[:method]
+        example_api_metadata[:method]
       end
 
       def in_path?(param)
@@ -136,11 +147,11 @@ module RspecApiDocumentation
       end
 
       def path_params
-        example.metadata[:path].scan(/:(\w+)/).flatten
+        example_api_metadata[:path].scan(/:(\w+)/).flatten
       end
 
       def path
-        example.metadata[:path].gsub(/:(\w+)/) do |match|
+        example_api_metadata[:path].gsub(/:(\w+)/) do |match|
           if respond_to?($1)
             send($1)
           else
@@ -154,7 +165,7 @@ module RspecApiDocumentation
       end
 
       def explanation(text)
-        example.metadata[:explanation] = text
+        example_api_metadata[:explanation] = text
       end
 
       def status
@@ -187,15 +198,20 @@ module RspecApiDocumentation
 
         hash
       end
+
+      def example_api_metadata
+        example.metadata[:api_documentation] ||= {}
+      end
     end
   end
 end
 
 def self.resource(*args, &block)
   options = if args.last.is_a?(Hash) then args.pop else {} end
+  options[:api_documentation] ||= {}
   options[:api_docs_dsl] = true
-  options[:resource_name] = args.first
-  options[:document] = true
+  options[:api_documentation][:resource_name] = args.first
+  options[:api_documentation][:document] = true
   args.push(options)
   describe(*args, &block)
 end

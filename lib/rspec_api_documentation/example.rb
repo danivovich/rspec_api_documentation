@@ -20,18 +20,18 @@ module RspecApiDocumentation
     end
 
     def method
-      metadata[:method]
+      api_metadata[:method]
     end
 
     def should_document?
-      return false if pending? || !metadata[:resource_name] || !metadata[:document]
+      return false if pending? || !api_metadata[:resource_name] || !api_metadata[:document]
       return true if configuration.filter == :all
-      return false if (Array(metadata[:document]) & Array(configuration.exclusion_filter)).length > 0
-      return true if (Array(metadata[:document]) & Array(configuration.filter)).length > 0
+      return false if (Array(api_metadata[:document]) & Array(configuration.exclusion_filter)).length > 0
+      return true if (Array(api_metadata[:document]) & Array(configuration.filter)).length > 0
     end
 
     def public?
-      metadata[:public]
+      api_metadata[:public]
     end
 
     def has_parameters?
@@ -39,11 +39,15 @@ module RspecApiDocumentation
     end
 
     def explanation
-      metadata[:explanation] || nil
+      api_metadata[:explanation] || nil
     end
 
     def requests
-      metadata[:requests] || []
+      api_metadata[:requests] || []
+    end
+
+    def api_metadata
+      metadata[:api_documentation] ||= {}
     end
   end
 end

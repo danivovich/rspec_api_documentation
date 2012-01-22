@@ -24,7 +24,7 @@ describe RspecApiDocumentation::ApiDocumentation do
   end
 
   describe "#document_example" do
-    let(:metadata) {{ :should_document => true }}
+    let(:metadata) { { :api_documentation => { :should_document => true } } }
     let(:group) { RSpec::Core::ExampleGroup.describe("test group") }
     let(:example) { group.example("test example", metadata) }
     let!(:wrapped_example) { RspecApiDocumentation::Example.new(example, configuration) }

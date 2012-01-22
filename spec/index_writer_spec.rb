@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe RspecApiDocumentation::IndexWriter do
   describe "#sections" do
-    let(:example_1) { stub(:resource_name => "Order", :description => "Updating an order") }
-    let(:example_2) { stub(:resource_name => "Order", :description => "Creating an order") }
-    let(:example_3) { stub(:resource_name => "Cart", :description => "Creating an cart") }
+    let(:example_1) { stub(:api_documentation => { :resource_name => "Order" }, :description => "Updating an order") }
+    let(:example_2) { stub(:api_documentation => { :resource_name => "Order" }, :description => "Creating an order") }
+    let(:example_3) { stub(:api_documentation => { :resource_name => "Cart" }, :description => "Creating an cart") }
     let(:examples) { [example_1, example_2, example_3] }
 
     subject { RspecApiDocumentation::IndexWriter.sections(examples) }

@@ -18,7 +18,7 @@ class StubApp < Sinatra::Base
   end
 end
 
-describe RspecApiDocumentation::TestClient do
+describe RspecApiDocumentation::TestClient, :api_documentation => {} do
   include Rack::Test::Methods
 
   let(:app) { StubApp }
@@ -30,7 +30,7 @@ describe RspecApiDocumentation::TestClient do
 
   its(:session) { should equal(self) }
   its(:example) { should equal(example) }
-  its(:metadata) { should equal(example.metadata) }
+  its(:metadata) { should equal(example.metadata[:api_documentation]) }
 
   describe "#last_response" do
     before do
@@ -119,9 +119,9 @@ describe RspecApiDocumentation::TestClient do
 
     let(:post_data) { { :target => "nurse" }.to_json }
 
-    context "when examples should be documented", :document => true do
+    context "when examples should be documented", :api_documentation => { :document => true } do
       it "should augment the metadata with information about the request" do
-        metadata = example.metadata[:requests].first
+        metadata = example.metadata[:api_documentation][:requests].first
         metadata[:method].should eq("POST")
         metadata[:route].should eq("/greet?query=test+query")
         metadata[:request_body].should eq("{\n  \"target\": \"nurse\"\n}")
@@ -137,7 +137,7 @@ describe RspecApiDocumentation::TestClient do
         let(:post_data) { { :target => "nurse", :email => "email@example.com" } }
 
         it "should not nil out request_body" do
-          example.metadata[:requests].first[:request_body].should eq("target=nurse\nemail=email@example.com")
+          example.metadata[:api_documentation][:requests].first[:request_body].should eq("target=nurse\nemail=email@example.com")
         end
       end
 
@@ -145,7 +145,7 @@ describe RspecApiDocumentation::TestClient do
         let(:post_data) { }
 
         it "should not nil out request_body" do
-          example.metadata[:requests].first[:request_body].should eq(nil)
+          example.metadata[:api_documentation][:requests].first[:request_body].should eq(nil)
         end
       end
     end
