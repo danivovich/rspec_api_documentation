@@ -15,7 +15,7 @@ describe RspecApiDocumentation::Example do
 
   describe "method delegation" do
     context "when the example's metadata has a key for the given method selector" do
-      let(:metadata) {{ :foo => nil }}
+      let(:metadata) { { :api_documentation => { :foo => nil } } }
 
       it "should return the metadata value for the given method selector as a key" do
         example.should respond_to(:foo)

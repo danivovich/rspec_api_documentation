@@ -8,15 +8,15 @@ module RspecApiDocumentation
     end
 
     def method_missing(method_sym, *args, &block)
-      if example.metadata.has_key?(method_sym)
-        example.metadata[method_sym]
+      if api_metadata.has_key?(method_sym)
+        api_metadata[method_sym]
       else
         example.send(method_sym, *args, &block)
       end
     end
 
     def respond_to?(method_sym, include_private = false)
-      super || example.metadata.has_key?(method_sym) || example.respond_to?(method_sym, include_private)
+      super || api_metadata.has_key?(method_sym) || example.respond_to?(method_sym, include_private)
     end
 
     def method
@@ -47,7 +47,7 @@ module RspecApiDocumentation
     end
 
     def api_metadata
-      metadata[:api_documentation] ||= {}
+      example.metadata[:api_documentation] ||= {}
     end
   end
 end

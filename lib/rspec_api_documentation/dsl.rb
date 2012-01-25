@@ -11,7 +11,8 @@ module RspecApiDocumentation
       def self.define_action(method)
         define_method method do |*args, &block|
           options = if args.last.is_a?(Hash) then args.pop else {} end
-          options[:api_documentation] ||= {}
+          options[:api_documentation] = {}
+          options[:api_documentation][:parameters] = Marshal.load(Marshal.dump(metadata[:api_documentation][:parameters]))
           options[:api_documentation][:method] = method
           options[:api_documentation][:path] = args.first
           args.push(options)
@@ -74,10 +75,6 @@ module RspecApiDocumentation
       private
       def parameters
         api_metadata[:parameters] ||= []
-        if superclass_api_metadata && api_metadata[:parameters].equal?(superclass_api_metadata[:parameters])
-          api_metadata[:parameters] = Marshal.load(Marshal.dump(superclass_api_metadata[:parameters]))
-        end
-        api_metadata[:parameters]
       end
 
       def parameter_keys
@@ -85,7 +82,10 @@ module RspecApiDocumentation
       end
 
       def api_metadata
-        metadata[:api_documentation] ||= {}
+        if superclass_api_metadata && metadata[:api_documentation].equal?(superclass_api_metadata)
+          metadata[:api_documentation] = Marshal.load(Marshal.dump(superclass_api_metadata))
+        end
+        metadata[:api_documentation]
       end
 
       def superclass_api_metadata
@@ -208,7 +208,7 @@ end
 
 def self.resource(*args, &block)
   options = if args.last.is_a?(Hash) then args.pop else {} end
-  options[:api_documentation] ||= {}
+  options[:api_documentation] = {}
   options[:api_docs_dsl] = true
   options[:api_documentation][:resource_name] = args.first
   options[:api_documentation][:document] = true

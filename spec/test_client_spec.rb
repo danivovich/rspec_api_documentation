@@ -119,7 +119,7 @@ describe RspecApiDocumentation::TestClient, :api_documentation => {} do
 
     let(:post_data) { { :target => "nurse" }.to_json }
 
-    context "when examples should be documented", :api_documentation => { :document => true } do
+    context "when examples should be documented", :document => true do
       it "should augment the metadata with information about the request" do
         metadata = example.metadata[:api_documentation][:requests].first
         metadata[:method].should eq("POST")

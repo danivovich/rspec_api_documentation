@@ -64,7 +64,7 @@ module RspecApiDocumentation
     end
 
     def document_example(method, action, params)
-      return unless metadata[:document]
+      return unless example.metadata[:document]
 
       input = last_request.env["rack.input"]
       input.rewind
